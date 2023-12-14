@@ -8,8 +8,6 @@ Components Needed:
 - [Mediator](https://github.com/hyperledger/aries-mediator-service)
 - [AFJ](https://github.com/openwallet-foundation/agent-framework-javascript)
   - [Resolve Pickup Protocol](https://github.com/hyperledger/aries-akrida/blob/main/docs/NONCLUSTERED.md#resolving-pickup-protocol-versions)
-  - [TODO: the correct line seems to be 106](https://github.com/hyperledger/aries-akrida/blob/main/load-agent/agent.ts#L106)
-  - TODO: follow up on error, corred AFJ version, and confirm how to set pickup protocol
 
 The majority of the locust work will be based on [Aries Akrida](https://github.com/hyperledger/aries-akrida)
 You can find majority of the setup here: [NonClustered Docs](https://github.com/hyperledger/aries-akrida/blob/main/docs/NONCLUSTERED.md#locust)
@@ -35,11 +33,34 @@ Navigate to `localhost:8089` and enter `http://host.docker.internal:8032` as hos
 ## Next steps involve:
 
 - creating a new `pre-locust` script, for both setup and teardown.
-  - the setup will include posting to setup the load test endpoints/configs TBD
+  - the setup will include posting to setup the load test endpoints/configs specifications TBD
   - will use a multi use agent per connection
   - teardown endpoint will also be needed to be used.
 - Creating a new Locust Behavoir.
   - Use the aries akrida base client, and create a new sequesntial task to request a credential locust mediator is an excellent example.
+
+An Example API request file is below:
+
+```
+class UserBehaviour(SequentialTaskSet):
+    def on_start(self):
+         self.client.startup(withMediation=bool(WITH_MEDIATION))
+
+    def on_stop(self):
+         self.client.shutdown()
+
+    @task
+    def send_api_request_example(self):
+        url = "https://swapi.dev/api/starships/9/"
+        response = requests.get(url)
+
+        if response.status_code == 200:
+            data = response.json()
+            print("Name:", data["name"])
+            print("Model:", data["model"])
+        else:
+            print("Failed to retrieve data from SWAPI")
+```
 
 ### Common Issues
 
