@@ -25,21 +25,29 @@ class CustomLocust(User):
 class UserBehaviour(SequentialTaskSet):
     def on_start(self):
         self.client.startup(withMediation=bool(WITH_MEDIATION))
+        
+        # Get Invite
+        self.invite = {'invitation_url': INVITATION_URL}
+
+        # Accept Invite
+        self.client.ensure_is_running()
+        connection = self.client.accept_invite(self.invite['invitation_url'])
+        self.connection = connection
 
     def on_stop(self):
         self.client.shutdown()
 
-    @task
-    def get_invite(self):
-        # make a blank invite object and set invitation_url to the env var
-        # for this use case the invitation is created outside of testing and pre-supplied
-        self.invite = {'invitation_url': INVITATION_URL}
+    # @task
+    # def get_invite(self):
+    #     # make a blank invite object and set invitation_url to the env var
+    #     # for this use case the invitation is created outside of testing and pre-supplied
+    #     self.invite = {'invitation_url': INVITATION_URL}
 
-    @task
-    def accept_invite(self):
-        self.client.ensure_is_running()
-        connection = self.client.accept_invite(self.invite['invitation_url'])
-        self.connection = connection
+    # @task
+    # def accept_invite(self):
+    #     self.client.ensure_is_running()
+    #     connection = self.client.accept_invite(self.invite['invitation_url'])
+    #     self.connection = connection
 
     @task
     def receive_credential(self):

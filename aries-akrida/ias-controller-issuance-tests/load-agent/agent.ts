@@ -353,7 +353,7 @@ let receiveCredential = async (agent) => {
 
   let onCredential = async (event) => {
     let payload = event.payload
-    process.stderr.write('******** onCredential'+ '\n' + payload.credentialRecord.state + '\n')
+    // process.stderr.write('******** onCredential'+ '\n' + payload.credentialRecord.state + '\n')
 
     switch (payload.credentialRecord.state) {
       case CredentialState.OfferReceived:
