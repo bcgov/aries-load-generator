@@ -47,6 +47,11 @@ Then the DID from that connection result in AFJ is a Peer DID and that needs to 
 ### iasController.py
 This file just makes the appropriate API call to the IAS controller to invoke issuance to the supplied DID.
 
+
+### BaseAgent.ts
+Akrida just uses the AFJ demo source to start up agents, this contains the BCOVRIN-TEST genesis for ledger. We want to use Candy, so need to add that.
+Must be a better way of doing this than relying on the demo...?
+
 ## Running Tests
 **Before running any tests confirm with the appropriate people at IDIM. Alwyas make sure the DELETE endpoint to clean up tests is run after. Do not do any large load when testing out changes**
 
