@@ -17,6 +17,9 @@ The files in Akrida/AFJ modified locally to make this work are contained in this
 
 ### .env and docker-compose.yml
 Need to change `LOCUST_FILES` to use the included new `locustMediatorIasIssue.py` file.
+
+Set `LEDGER` to bcovrin or candy depending on use case. (Check with IDIM which environment/ledger combo)
+
 Some new environmnent variables need to be added for the IAS API calls as well.
 
 The new environment variables need to be added to the docker compose as well so they get imported.
