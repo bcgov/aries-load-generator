@@ -6,8 +6,11 @@ import time
 
 class IasControllerIssuer(BaseIssuer):
         def issue_credential(self, did):
-                print("**************IAS issue_credential***********")
-                print(did)
+                print(f"DEBUG: IAS issue_credential to DID: {did}")
+
+                # wait 1 second
+                time.sleep(1)
+
                 headers = {}
                 headers["Content-Type"] = "application/json"
                 headers["X-API-KEY"] = os.getenv("IAS_CONTROLLER_API_KEY")
@@ -16,11 +19,8 @@ class IasControllerIssuer(BaseIssuer):
                         f"{os.getenv('IAS_CONTROLLER_URL')}/credentials/{did}/next",
                         headers=headers,
                 )
-                print("**************IAS issue_credential RESPONSE***********")
-                print(r)
-                if r.status_code != 200:
-                        raise Exception(r.content)
 
-                r = r.json()
+                if r.status_code != 202:
+                        print(f"Error from IAS issue cred API call: {r.status_code} {r.text}")
 
                 return {}

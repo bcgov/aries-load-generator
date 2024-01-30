@@ -359,13 +359,13 @@ let receiveCredential = async (agent) => {
       case CredentialState.OfferReceived:
         //console.log('received a credential')
         // custom logic here
-        process.stderr.write('******** OfferReceived'+ '\n' + payload.credentialRecord.id + '\n')
+        process.stderr.write('DEBUG: Cred Offer Received. Record ID:' + payload.credentialRecord.id + '\n')
         await agent.credentials.acceptOffer({
           credentialRecordId: payload.credentialRecord.id,
         })
         break
       case CredentialState.CredentialReceived:
-        process.stderr.write('******** CredentialReceived'+ '\n' + payload.credentialRecord.id + '\n')
+        process.stderr.write('DEBUG: Credential Received. Record ID:' + payload.credentialRecord.id + '\n')
         //console.log(`Credential for credential id ${payload.credentialRecord.id} is accepted`)
         // For demo purposes we exit the program here.
 
@@ -375,7 +375,7 @@ let receiveCredential = async (agent) => {
         )
 
         def.resolve(true)
-        process.stderr.write('******** resolved')
+        process.stderr.write('DEBUG: Cred reception resolved' + '\n')
         break
     }
   }

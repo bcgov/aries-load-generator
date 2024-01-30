@@ -80,5 +80,4 @@ This file just makes the appropriate API call to the IAS controller to invoke is
 
 ## Notes/TODOs
 - Some of the things in here, specifically the `agent.ts` changes are now specifying the tests to the IAS test case here. Need to generalize some more before commiting back to Akrida
-- The tests recieve a credential and complete but overall mark it as a failure with a `Exception(b'')` message. TODO to figure out where it's not capping off the test to mark as success.
-- Need more testing out/hardening. Sometimes I get a 404 on the first cred issuance back from the IAS controller, may be a timing thing.
+- Need more testing out/hardening. Sometimes I get a 404 on the first cred issuance back from the IAS controller, may be a timing thing. (Update: I added a 1 second wait before calling issue, no more 404s so far...)

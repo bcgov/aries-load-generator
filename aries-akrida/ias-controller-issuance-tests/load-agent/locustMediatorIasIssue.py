@@ -51,11 +51,7 @@ class UserBehaviour(SequentialTaskSet):
 
     @task
     def receive_credential(self):
-        print(self.connection)
-
         credential = self.client.receive_credential(self.connection)
-        print('******* after recieve credential')
-        print(credential)
 
 class Issue(CustomLocust):
     tasks = [UserBehaviour]
