@@ -29,6 +29,7 @@ The locust test to run to do the issuance, customized for the IAS use case being
 Based on `locustMediatorIssue.py` originally. Relevant changes described below:
 
 - The other issuance tests in Akrida spin up an agent and then recieve an invitation every time it runs throuhg the test on the agent. Not sure how this ever works on other tests? Errors when trying to recieve the same invitation on the same agent a second time (maybe different invitation type on other Akrida tests?), but regardless, modified to recieve the invitation once at the beginning.
+- For our use case we only want the user to do the task once and nothing else (Locust repeats tasks) so just do it all in on start. Need a dummy empty task to not throw an error.
 - Modified to recieve a provided invitation url (Connections protocol) that is given in ENV file.
 - Modified to call a custom issuerAgent that invoked the IAS controller to do the issuance.
 
