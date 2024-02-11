@@ -1,4 +1,6 @@
 from locust import SequentialTaskSet, task, User, between
+from locust.exception import StopUser
+
 from locustClient import CustomClient
 import time
 import inspect
@@ -25,7 +27,7 @@ class CustomLocust(User):
 class UserBehaviour(SequentialTaskSet):
     def on_start(self):
         self.client.startup(withMediation=bool(WITH_MEDIATION))
-        
+        self.counter = 0 # add a counter attribute
 
     def on_stop(self):
         self.client.shutdown()
@@ -49,6 +51,10 @@ class UserBehaviour(SequentialTaskSet):
         # Delete Connection
         self.client.delete_connection(self.connection["oobRecordId"])
 
+        self.counter += 1
+        if self.counter == 10:
+            print("Limit reached for user")
+            raise StopUser()
 
     # @task
     # def get_invite(self):
