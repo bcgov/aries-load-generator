@@ -16,7 +16,7 @@ A number of changes are needed to fit the IAS test case into the existing Akrida
 The files in Akrida/AFJ modified locally to make this work are contained in this repository. Any files found (under this top level `ias-controller-issuance-tests` folder) can be copied into a cloned Aries Akrida project in the same directory structure here (or for .env add the 4 relevant keys to a sample env file).
 
 ### .env and docker-compose.yml
-Need to change `LOCUST_FILES` to use the included new `locustMediatorIasIssue.py` file.
+Need to change `LOCUST_FILES` to use the included which flavor of the new `locustMediatorIasIssue.py` file to use. See details of each below.
 
 Set `LEDGER` to bcovrin or candy depending on use case. (Check with IDIM which environment/ledger combo)
 
@@ -24,14 +24,27 @@ Some new environmnent variables need to be added for the IAS API calls as well.
 
 The new environment variables need to be added to the docker compose as well so they get imported.
 
-### locustMediatorIasIssue.py
+### locustMediatorIasIssue*.py
 The locust test to run to do the issuance, customized for the IAS use case being tested here.
-Based on `locustMediatorIssue.py` originally. Relevant changes described below:
+Based on `locustMediatorIssue.py` originally. Relevant changes described for each one below.
 
-- The other issuance tests in Akrida spin up an agent and then recieve an invitation every time it runs throuhg the test on the agent. Not sure how this ever works on other tests? Errors when trying to recieve the same invitation on the same agent a second time (maybe different invitation type on other Akrida tests?), but regardless, modified to recieve the invitation once at the beginning.
-- For our use case we only want the user to do the task once and nothing else (Locust repeats tasks) so just do it all in on start. Need a dummy empty task to not throw an error.
 - Modified to recieve a provided invitation url (Connections protocol) that is given in ENV file.
 - Modified to call a custom issuerAgent that invoked the IAS controller to do the issuance.
+
+There are 3 versions of the script included here.
+
+#### locustMediatorIasIssue.py
+- For a User does the receive invite, call for cred issuance, recieve cred just once and then is done.
+- Need a dummy empty task to not throw an error.
+
+#### locustMediatorIasIssueSingleInvitation.py
+- Gets an invitation at the beginning of the user flow
+- Then runs the task receiveing a credential to that DID repeatedly
+
+#### locustMediatorIasIssueDeleteReuseInvitation.py
+- Gets an invitation at the beginning of each repeated task and recieves the credential
+- Then DELETES the OOB record (aries errors if it tries to recieve the invite again)
+- So on next @task run it recieves the invite again and recieves a cred again
 
 ### agent.ts
 The AFJ Agent invocation needs to be changed here. The IAS Controller needs a connection DID for the issuance call. The Akrida tests were only returning an OOB object, not the connection with the DID.
@@ -47,6 +60,11 @@ Then the DID from that connection result in AFJ is a Peer DID and that needs to 
     const didRecord = dids.filter((d) => d.did === connectionRecord?.did).pop()
     legacyConnectionDid = didRecord.metadata.get(legacyDidKey)!.unqualifiedDid
 ```
+
+Added a `deleteConnectionById` function that deletes an oob record. This just invokes the call down to AFJ `agent.oob.deleteById` but doesn't do event waiting the way some of the other ones in here do... seems to work but a TODO to see if this should be changed.
+
+### locustClient.py
+Add a call to the new delete OOB record function
 
 ### iasController.py
 This file just makes the appropriate API call to the IAS controller to invoke issuance to the supplied DID.

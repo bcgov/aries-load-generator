@@ -271,6 +271,50 @@ const pingMediator = async (agent) => {
   }
 }
 
+let deleteConnectionById = async (agent, id) => {
+  // wait for the connection deletion
+  // let timeout = config.verified_timeout_seconds * 1000;
+  // const TimeDelay = new Promise((resolve, reject) => {
+  //   setTimeout(resolve, timeout, false);
+  // });
+
+  // var def = deferred();
+
+  // var onConnection = async (event) => {
+  //   {
+  //     let payload = event.payload;
+  //     process.stderr.write('******** DEBUG deleteConnectionById onConnection'+ '\n' + payload.connectionRecord.state + '\n')
+  //     if (payload.connectionRecord.state === DidExchangeState.Completed) {
+  //       agent.events.off(
+  //         ConnectionEventTypes.ConnectionStateChanged,
+  //         onConnection
+  //       );
+
+  //       def.resolve(true);
+  //     }
+  //   }
+  // };
+
+  // agent.events.on(ConnectionEventTypes.ConnectionStateChanged, onConnection);
+
+  try {
+    process.stderr.write('DEBUG: deleteConnectionById ' + id + '\n')
+    const resp = await agent.oob.deleteById(id);
+    
+  } catch (error) {
+    process.stderr.write('******** ERROR'+ '\n' + error + '\n')
+  }
+
+  // wait for connection
+  // let value = await Promise.race([TimeDelay, def.promise]);
+
+  // if (!value) {
+  //   // we no longer need to listen to the event in case of failure
+  //   agent.events.off(ConnectionEventTypes.ConnectionStateChanged, onConnection);
+  //   throw "Connection timeout!";
+  // }
+};
+
 let receiveInvitation = async (agent, invitationUrl) => {
     // wait for the connection
   let timeout = config.verified_timeout_seconds * 1000
@@ -308,12 +352,18 @@ let receiveInvitation = async (agent, invitationUrl) => {
   )
 
   let legacyConnectionDid = undefined;
+  let connectionId = undefined;
+  let oobRecordId = undefined;
   try {
     // LO: need connection record, not OOB record since we need the connection DID
     const { outOfBandRecord, connectionRecord } = await agent.oob.receiveInvitationFromUrl(
       invitationUrl
     )
     const strRes = JSON.stringify(connectionRecord)
+    connectionId = connectionRecord.id;
+    oobRecordId = outOfBandRecord.id;
+    // log ooB record id
+    process.stderr.write('DEBUG: receiveInvitation oobRecordId' + '\n' + oobRecordId + '\n')
 
     // LO: retrieve the legacy DID. IAS controller needs that to issue against
     // This code adapted from https://github.com/bcgov/bc-wallet-mobile/blob/main/app/src/helpers/BCIDHelper.ts
@@ -338,7 +388,7 @@ let receiveInvitation = async (agent, invitationUrl) => {
     throw 'Connection timeout!'
   }
 
-  return legacyConnectionDid
+  return { did: legacyConnectionDid, connectionId: connectionId, oobRecordId: oobRecordId}
 }
 
 let receiveCredential = async (agent) => {
@@ -529,6 +579,12 @@ rl.on('line', async (line) => {
       await pingMediator(agent)
       process.stdout.write(
         JSON.stringify({ error: 0, result: 'Ping Mediator' }) + '\n'
+      )
+    } else if (command['cmd'] == 'deleteConnectionById') {
+      await deleteConnectionById(agent, command['connectionId'])
+
+      process.stdout.write(
+        JSON.stringify({ error: 0, result: 'Delete Connection' }) + '\n'
       )
     } else if (command['cmd'] == 'receiveInvitation') {
       let connection = await receiveInvitation(agent, command['invitationUrl'])
