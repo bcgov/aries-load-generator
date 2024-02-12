@@ -8,7 +8,7 @@ class IasControllerIssuer(BaseIssuer):
         def issue_credential(self, did):
                 print(f"DEBUG: IAS issue_credential to DID: {did}")
 
-                # wait 1 second
+                # wait 1 second for the DID to propagate through
                 time.sleep(1)
 
                 headers = {}

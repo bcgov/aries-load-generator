@@ -33,44 +33,40 @@ class UserBehaviour(SequentialTaskSet):
         self.client.shutdown()
 
     @task
-    def get_invite_and_cred(self):
-        # Get Invite
+    def recieve_invitation(self):
+        # Get Invite url from env
         self.invite = {'invitation_url': INVITATION_URL}
 
         # Accept Invite
         self.client.ensure_is_running()
         connection = self.client.accept_invite(self.invite['invitation_url'])
-        self.connection = connection
-
+        
         # print(f"Connection ID: {self.connection['connectionId']}")
         # print(f"OOB ID: {self.connection['oobRecordId']}")
 
-        # Receive Credential
-        credential = self.client.receive_credential(self.connection['did'])
+        self.connection = connection
 
-        # Delete Connection
-        self.client.delete_connection(self.connection["oobRecordId"])
+    @task
+    def call_ias_for_cred_and_recieve(self):
+        self.client.ensure_is_running()
 
-        self.counter += 1
-        if self.counter == 10:
-            print("Limit reached for user")
-            raise StopUser()
+        # Call the IAS "/next" endpoint to issue the credential  
+        # Agent handles recieving the credential states internally
+        iasResponseBody = self.client.receive_credential(self.connection['did'])
 
-    # @task
-    # def get_invite(self):
-    #     # make a blank invite object and set invitation_url to the env var
-    #     # for this use case the invitation is created outside of testing and pre-supplied
-    #     self.invite = {'invitation_url': INVITATION_URL}
+    @task
+    def delete_oob_record(self):
+        self.client.ensure_is_running()
+        
+        # Remove the OOB record so next loop it can get invite again
+        self.client.delete_oob(self.connection["oobRecordId"])
 
-    # @task
-    # def accept_invite(self):
-    #     self.client.ensure_is_running()
-    #     connection = self.client.accept_invite(self.invite['invitation_url'])
-    #     self.connection = connection
+        # uncomment and adjust counter val if you want a limit per user 
+        # self.counter += 1
+        # if self.counter == 10:
+        #     print("Limit reached for user")
+        #     raise StopUser()
 
-    # @task
-    # def receive_credential(self):
-    #     credential = self.client.receive_credential(self.connection)
 
 class Issue(CustomLocust):
     tasks = [UserBehaviour]

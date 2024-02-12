@@ -271,7 +271,7 @@ const pingMediator = async (agent) => {
   }
 }
 
-let deleteConnectionById = async (agent, id) => {
+let deleteOobRecordById = async (agent, id) => {
   // wait for the connection deletion
   // let timeout = config.verified_timeout_seconds * 1000;
   // const TimeDelay = new Promise((resolve, reject) => {
@@ -283,7 +283,7 @@ let deleteConnectionById = async (agent, id) => {
   // var onConnection = async (event) => {
   //   {
   //     let payload = event.payload;
-  //     process.stderr.write('******** DEBUG deleteConnectionById onConnection'+ '\n' + payload.connectionRecord.state + '\n')
+  //     process.stderr.write('******** DEBUG deleteOobRecordById onConnection'+ '\n' + payload.connectionRecord.state + '\n')
   //     if (payload.connectionRecord.state === DidExchangeState.Completed) {
   //       agent.events.off(
   //         ConnectionEventTypes.ConnectionStateChanged,
@@ -298,7 +298,7 @@ let deleteConnectionById = async (agent, id) => {
   // agent.events.on(ConnectionEventTypes.ConnectionStateChanged, onConnection);
 
   try {
-    process.stderr.write('DEBUG: deleteConnectionById ' + id + '\n')
+    process.stderr.write('DEBUG: deleteOobRecordById ' + id + '\n')
     const resp = await agent.oob.deleteById(id);
     
   } catch (error) {
@@ -363,7 +363,7 @@ let receiveInvitation = async (agent, invitationUrl) => {
     connectionId = connectionRecord.id;
     oobRecordId = outOfBandRecord.id;
     // log ooB record id
-    process.stderr.write('DEBUG: receiveInvitation oobRecordId' + '\n' + oobRecordId + '\n')
+    // process.stderr.write('DEBUG: receiveInvitation oobRecordId' + '\n' + oobRecordId + '\n')
 
     // LO: retrieve the legacy DID. IAS controller needs that to issue against
     // This code adapted from https://github.com/bcgov/bc-wallet-mobile/blob/main/app/src/helpers/BCIDHelper.ts
@@ -409,14 +409,20 @@ let receiveCredential = async (agent) => {
       case CredentialState.OfferReceived:
         //console.log('received a credential')
         // custom logic here
-        process.stderr.write('DEBUG: Cred Offer Received. Record ID:' + payload.credentialRecord.id + '\n')
+        process.stderr.write('DEBUG: Cred Offer Received. Record ID: ' + payload.credentialRecord.id + '\n')
         await agent.credentials.acceptOffer({
           credentialRecordId: payload.credentialRecord.id,
         })
         break
       case CredentialState.CredentialReceived:
-        process.stderr.write('DEBUG: Credential Received. Record ID:' + payload.credentialRecord.id + '\n')
-        //console.log(`Credential for credential id ${payload.credentialRecord.id} is accepted`)
+        process.stderr.write(`DEBUG: Credential Received. State: ${payload.credentialRecord.state}. Record ID: ${payload.credentialRecord.id} \n`)
+
+        // log out details of the credential, comment this in/out as needed
+        // const def = payload.credentialRecord.metadata["_anoncreds/credential"]?.credentialDefinitionId;
+        const given = payload.credentialRecord.credentialAttributes?.find((attr) => attr.name === "given_names").value;
+        const fam = payload.credentialRecord.credentialAttributes?.find((attr) => attr.name === "family_name").value; 
+        process.stderr.write(`DEBUG: Cred issued to person ${given} ${fam}. Thread ID ${payload.credentialRecord.threadId} \n`)
+
         // For demo purposes we exit the program here.
 
         agent.events.off(
@@ -580,8 +586,8 @@ rl.on('line', async (line) => {
       process.stdout.write(
         JSON.stringify({ error: 0, result: 'Ping Mediator' }) + '\n'
       )
-    } else if (command['cmd'] == 'deleteConnectionById') {
-      await deleteConnectionById(agent, command['connectionId'])
+    } else if (command['cmd'] == 'deleteOobRecordById') {
+      await deleteOobRecordById(agent, command['connectionId'])
 
       process.stdout.write(
         JSON.stringify({ error: 0, result: 'Delete Connection' }) + '\n'

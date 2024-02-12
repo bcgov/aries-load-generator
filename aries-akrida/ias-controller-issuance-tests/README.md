@@ -42,10 +42,10 @@ There are 3 versions of the script included here.
 - Then runs the task receiveing a credential to that DID repeatedly
 
 #### locustMediatorIasIssueDeleteReuseInvitation.py
-- Gets an invitation at the beginning of each repeated task and recieves the credential
+- Gets an invitation at the beginning of each repeated task run and recieves the credential
 - Then DELETES the OOB record (aries errors if it tries to recieve the invite again)
 - So on next @task run it recieves the invite again and recieves a cred again
-- Runs the task a total of 10 times per use (TODO to parameterize this). Take out the counter check if you want it to keep repeating
+- Option (comment in block at the bottom) to run the task a total of 10 times per use (TODO to parameterize this).
 
 ### agent.ts
 The AFJ Agent invocation needs to be changed here. The IAS Controller needs a connection DID for the issuance call. The Akrida tests were only returning an OOB object, not the connection with the DID.

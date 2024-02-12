@@ -262,8 +262,8 @@ class CustomClient:
         return self.issuer.is_up()
 
     @stopwatch
-    def delete_connection(self, connectionId):
-        self.run_command({"cmd": "deleteConnectionById", "connectionId": connectionId})
+    def delete_oob(self, connectionId):
+        self.run_command({"cmd": "deleteOobRecordById", "connectionId": connectionId})
 
         line = self.readjsonline()
 
