@@ -50,11 +50,5 @@ Include a `CRED_ATTR` of the IAS Person Cred attributes including a dummy base64
 
 ## Akrida Changes Required
 
-### verifierAgent acapy.py
-Add a call to the Verifier acapy agent that creates a connectionless PR with `/present-proof/create-request`
-
-### locustClient.py
-Add a call to the new verifier agent connectionless PR function
-
 ### Dockerfile
 https://pypi.org/project/beautifulsoup4/ import for parsing HTML (get deep link for VCauthn)
