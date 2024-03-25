@@ -39,7 +39,7 @@ class UserBehaviour(SequentialTaskSet):
 
         # Accept Invite
         self.client.ensure_is_running()
-        connection = self.client.accept_invite(self.invite['invitation_url'])
+        connection = self.client.accept_invite(self.invite['invitation_url'], True)
         
         # print(f"Connection ID: {self.connection['connectionId']}")
         # print(f"OOB ID: {self.connection['oobRecordId']}")

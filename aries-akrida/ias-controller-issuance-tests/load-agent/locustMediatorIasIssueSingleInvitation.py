@@ -31,7 +31,7 @@ class UserBehaviour(SequentialTaskSet):
 
         # Accept Invite
         self.client.ensure_is_running()
-        connection = self.client.accept_invite(self.invite['invitation_url'])
+        connection = self.client.accept_invite(self.invite['invitation_url'], True)
         self.connection = connection
 
     def on_stop(self):

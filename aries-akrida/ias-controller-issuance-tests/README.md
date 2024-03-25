@@ -11,8 +11,6 @@ This doesn't contain any details on that IAS Test Issuer controller, just the ch
 
 ## Akrida Changes Required
 
-A number of changes are needed to fit the IAS test case into the existing Akrida flow.
-
 The files in Akrida/AFJ modified locally to make this work are contained in this repository. Any files found (under this top level `ias-controller-issuance-tests` folder) can be copied into a cloned Aries Akrida project in the same directory structure here (or for .env add the 4 relevant keys to a sample env file).
 
 ### .env and docker-compose.yml
@@ -47,28 +45,14 @@ There are 3 versions of the script included here.
 - So on next @task run it recieves the invite again and recieves a cred again
 - Option (comment in block at the bottom) to run the task a total of 10 times per use (TODO to parameterize this).
 
-### agent.ts
-The AFJ Agent invocation needs to be changed here. The IAS Controller needs a connection DID for the issuance call. The Akrida tests were only returning an OOB object, not the connection with the DID.
-
-Then the DID from that connection result in AFJ is a Peer DID and that needs to be converted to a legacy DID in order for the IAS controller to be able to use it successfully. The code to do this (below) was just lifted from the BC Wallet source code.
-
-```
-    // LO: retrieve the legacy DID. IAS controller needs that to issue against
-    // This code adapted from https://github.com/bcgov/bc-wallet-mobile/blob/main/app/src/helpers/BCIDHelper.ts
-    const legacyDidKey = '_internal/legacyDid' // TODO:(from BC Wallet code) Waiting for AFJ export of this.
-    const didRepository = agent.dependencyManager.resolve(DidRepository)  
-    const dids = await didRepository.getAll(agent.context)
-    const didRecord = dids.filter((d) => d.did === connectionRecord?.did).pop()
-    legacyConnectionDid = didRecord.metadata.get(legacyDidKey)!.unqualifiedDid
-```
-
-Added a `deleteConnectionById` function that deletes an oob record. This just invokes the call down to AFJ `agent.oob.deleteById` but doesn't do event waiting the way some of the other ones in here do... seems to work but a TODO to see if this should be changed.
-
-### locustClient.py
-Add a call to the new delete OOB record function
-
 ### iasController.py
-This file just makes the appropriate API call to the IAS controller to invoke issuance to the supplied DID.
+This file makes the appropriate API call to the IAS controller to invoke issuance to the supplied DID.
+
+### agent.ts and locustClient.py
+Manual changes no longer needed, they were applied to Akrida core in 
+https://github.com/hyperledger/aries-akrida/pull/47
+https://github.com/hyperledger/aries-akrida/pull/48
+
 
 ## Running Tests
 **Before running any tests confirm with the appropriate people at IDIM. Alwyas make sure the DELETE endpoint to clean up tests is run after. Do not do any large load when testing out changes**
@@ -97,7 +81,3 @@ This file just makes the appropriate API call to the IAS controller to invoke is
 5. Start a small test 
 6. When ready, click "Stop Test"
 7. Run `docker compose -f docker-compose.yml stop` to stop the swarm.
-
-## Notes/TODOs
-- Some of the things in here, specifically the `agent.ts` changes are now specifying the tests to the IAS test case here. Need to generalize some more before commiting back to Akrida
-- Need more testing out/hardening. Sometimes I get a 404 on the first cred issuance back from the IAS controller, may be a timing thing. (Update: I added a 1 second wait before calling issue, no more 404s so far...)
